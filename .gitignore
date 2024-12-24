@@ -41,3 +41,4 @@ build/
 /product-service/data/
 /order-service/mysql/
 /inventory-service/docker/
+/api-gateway/volume-data/
