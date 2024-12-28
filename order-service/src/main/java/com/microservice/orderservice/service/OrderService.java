@@ -4,7 +4,9 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import com.microservice.orderservice.dto.response.GetAllOrderResponse;
+import com.microservice.orderservice.event.OrderPlacedEvent;
 
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import com.microservice.orderservice.client.InventoryClient;
@@ -13,12 +15,15 @@ import com.microservice.orderservice.model.Order;
 import com.microservice.orderservice.repository.OrderRepository;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class OrderService {
     private final OrderRepository orderRepository;
     private final InventoryClient inventoryClient;
+    private final KafkaTemplate<String, OrderPlacedEvent> kafkaTemplate;
 
     public void placeOrder(PlaceOrderRequest placeOrderRequest) {
         
@@ -30,6 +35,12 @@ public class OrderService {
             order.setPrice(placeOrderRequest.price());
             order.setQuantity(placeOrderRequest.quantity());
             orderRepository.save(order);
+
+            //Send the message to Kafka Topic
+            OrderPlacedEvent orderPlacedEvent = new OrderPlacedEvent(order.getOrderNumber(), placeOrderRequest.userDetails().email());
+            log.info("Start-Sending OrderPlacedEvent {} to Kafka Topic order-placed", orderPlacedEvent);
+            kafkaTemplate.send("order-placed", orderPlacedEvent);
+            log.info("End-Sending OrderPlacedEvent {} to Kafka Topic order-placed", orderPlacedEvent);
         }else{
             throw new RuntimeException("Product is out of stock");
         }
