@@ -7,7 +7,7 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.mail.javamail.MimeMessagePreparator;
 import org.springframework.stereotype.Service;
 
-import com.microservice.order.event.OrderPlacedEvent;
+import com.microservice.orderservice.event.OrderPlacedEvent;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,13 +29,15 @@ public class NotificationService {
             messageHelper.setTo(orderPlacedEvent.getEmail().toString());
             messageHelper.setSubject(String.format("Your Order with OrderNumber %s is placed successfully", orderPlacedEvent.getOrderNumber()));
             messageHelper.setText(String.format("""
-                            Hi
+                            Hi %s %s,
 
                             Your order with order number %s is now placed successfully.
                             
                             Best Regards
                             Spring Shop
                             """,
+                    orderPlacedEvent.getFirstName(), 
+                    orderPlacedEvent.getLastName(),
                     orderPlacedEvent.getOrderNumber()));
         };
         try {
