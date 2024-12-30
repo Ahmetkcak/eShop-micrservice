@@ -42,3 +42,4 @@ build/
 /order-service/mysql/
 /inventory-service/docker/
 /api-gateway/volume-data/
+/api-gateway/docker/tempo/tempo-data/
